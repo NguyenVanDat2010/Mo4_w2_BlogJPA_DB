@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.sql.Timestamp;
 
 @Entity // Đánh dấu đây là table trong db
@@ -13,6 +14,7 @@ public class Blog {
     @Id //Đánh dấu là primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Giúp tự động tăng
     private Long id;
+    @NotEmpty
     private String author;
     @Type(type = "text")
     private String content;
@@ -20,6 +22,10 @@ public class Blog {
 //    @CreationTimestamp
     @UpdateTimestamp
     private Timestamp createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public Long getId() {
         return id;
@@ -51,5 +57,13 @@ public class Blog {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

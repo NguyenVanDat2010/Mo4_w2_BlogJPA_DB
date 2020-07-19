@@ -19,6 +19,10 @@
         <label th:text="${blog.getContent()}"></label>
     </div>
     <div>
+        <label><b>Category:</b></label>
+        <label th:text="${blog.getCategory().name}"></label>
+    </div>
+    <div>
         <label><b>Create time:</b></label>
         <label th:text="${blog.getCreatedAt()}"></label>
     </div>

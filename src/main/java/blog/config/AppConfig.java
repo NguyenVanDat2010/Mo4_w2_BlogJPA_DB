@@ -1,9 +1,10 @@
 package blog.config;
 
-import blog.repository.impl.BlogRepository;
-import blog.repository.impl.IBlogRepository;
-import blog.service.impl.BlogService;
-import blog.service.impl.IBlogService;
+import blog.fomatter.CategoryFormatter;
+import blog.service.blog.BlogService;
+import blog.service.blog.IBlogService;
+import blog.service.category.CategoryService;
+import blog.service.category.ICategoryService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -12,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -35,7 +38,8 @@ import java.util.Properties;
 @Configuration
 @EnableWebMvc
 @EnableTransactionManagement
-@ComponentScan("blog.controller")
+@EnableSpringDataWebSupport
+@ComponentScan("blog")
 @EnableJpaRepositories("blog.repository")
 public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationContextAware {
     ApplicationContext applicationContext;
@@ -45,13 +49,23 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
     }
 
     @Bean
+    public IBlogService blogService(){
+        return new BlogService();
+    }
+
+    @Bean
+    public ICategoryService categoryService(){
+        return new CategoryService();
+    }
+
+    @Bean
     public SpringResourceTemplateResolver templateResolver (){
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
         templateResolver.setApplicationContext(applicationContext);
+        templateResolver.setCharacterEncoding("UTF-8");
         templateResolver.setPrefix("/WEB-INF/views/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode(TemplateMode.HTML);
-        templateResolver.setCharacterEncoding("UTF-8");
         return templateResolver;
     }
 
@@ -65,8 +79,8 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
     @Bean
     public ThymeleafViewResolver viewResolver(){
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-        viewResolver.setTemplateEngine(templateEngine());
         viewResolver.setCharacterEncoding("UTF-8");
+        viewResolver.setTemplateEngine(templateEngine());
         return viewResolver;
     }
 
@@ -79,7 +93,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
     @Bean
     public DataSource dataSource(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource.setUrl("jdbc:mysql://localhost:3306/cms");
         dataSource.setUsername("root");
         dataSource.setPassword("123456");
@@ -95,7 +109,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean(){
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(){
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
         em.setPackagesToScan(new String[]{"blog.model"});
@@ -113,13 +127,8 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
         return transactionManager;
     }
 
-    @Bean
-    public IBlogRepository blogRepository(){
-        return new BlogRepository();
-    }
-
-    @Bean
-    public IBlogService blogService(){
-        return new BlogService();
-    }
+//    @Override
+//    public void addFormatters(FormatterRegistry registry) {
+//        registry.addFormatter(new CategoryFormatter(applicationContext.getBean(CategoryService.class)));
+//    }
 }
